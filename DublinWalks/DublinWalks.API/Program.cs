@@ -1,4 +1,5 @@
 using DublinWalks.API.Data;
+using DublinWalks.API.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,7 +13,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<DublinDbContext>(options => {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DublinWalks"));
 });
-    
+
+builder.Services.AddScoped<IRegionRepository, RegionRepository>();
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
