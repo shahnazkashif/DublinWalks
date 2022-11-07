@@ -15,6 +15,8 @@ builder.Services.AddDbContext<DublinDbContext>(options => {
 });
 
 builder.Services.AddScoped<IRegionRepository, RegionRepository>();
+//Dependancy injection for Walk Repository
+builder.Services.AddScoped<IWalkRepository, WalkRepository>();  
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 var app = builder.Build();
 

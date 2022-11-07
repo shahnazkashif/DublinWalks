@@ -153,7 +153,8 @@ namespace DublinWalks.API.Controllers
 
         [HttpPut]
         [Route("{id:guid}")]
-        public async Task<IActionResult> UpdateRegionAsync([FromRoute] Guid id, [FromBody] Modals.DTO.UpdateRegionRequest updateRegionRequest )
+        public async Task<IActionResult> UpdateRegionAsync([FromRoute] Guid id,
+            [FromBody] Modals.DTO.UpdateRegionRequest updateRegionRequest )
         {
 
             //Convert DTO to domain modal
@@ -179,7 +180,6 @@ namespace DublinWalks.API.Controllers
 
 
             //Convert Domain back to DTO
-            //Convert back to DTO
             var regionDTO = new Modals.DTO.Region()
             {
                 Id = region.Id,
@@ -193,7 +193,9 @@ namespace DublinWalks.API.Controllers
 
             //Return OK Response
             return Ok(regionDTO);
-
         }
-      }
+
+        
+
+    }
 }
