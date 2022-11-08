@@ -47,10 +47,9 @@ namespace DublinWalks.API.Repositories
                 .Include(x => x.WalkDifficulty)
                 .ToListAsync(); 
         }
-
-        public Task<Walk> GetAsync(Guid id)
+        public async Task<Walk> GetAsync(Guid id)
         {
-          return  dublinwalkdb.Walks
+          return await  dublinwalkdb.Walks
                 .Include(x => x.Region)
                 .Include(x => x.WalkDifficulty)
                 .FirstOrDefaultAsync(x => x.Id == id);  
