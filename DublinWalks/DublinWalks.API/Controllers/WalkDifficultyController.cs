@@ -50,6 +50,12 @@ namespace DublinWalks.API.Controllers
         [HttpPost]
         public async Task<IActionResult> AddWalkDifficultyAsync(Modals.DTO.AddWalkDifficultyRequest addwalkDifficultiRequest)
         {
+            //validate the incoming request 
+            if (!ValidateAddWalkDifficultyAsyn(addwalkDifficultiRequest))
+            {
+                return BadRequest(ModelState);
+            }
+
             //convert DTO to Domain object 
             var walkDifficultyDomain = new Modals.Domain.WalkDifficulty
             {
@@ -72,6 +78,12 @@ namespace DublinWalks.API.Controllers
         public async Task<IActionResult> UpdateWalkDifficultyAsync([FromRoute] Guid id,
             [FromBody] Modals.DTO.UpdateWalkDifficultyRequest updateWalkDifficultyRequest)
         {
+            //validate the incoming request 
+            if (!ValidateUpdateWalkDifficultyAsyn(updateWalkDifficultyRequest))
+            {
+                return BadRequest(ModelState);
+            }
+
             //convert DTO to Domain object
             var walkDifficultyDomain = new Modals.Domain.WalkDifficulty
             {
@@ -110,5 +122,55 @@ namespace DublinWalks.API.Controllers
             var walkDifficultyDTO = mapper.Map<Modals.DTO.WalkDifficulty>(walkDifficultyDomain);
             return Ok(walkDifficultyDTO);
         }
+
+        #region Private Methods
+
+        private bool ValidateAddWalkDifficultyAsyn(Modals.DTO.AddWalkDifficultyRequest addwalkDifficultiRequest)
+        {
+            if (addwalkDifficultiRequest == null)
+            {
+                ModelState.AddModelError(nameof(addwalkDifficultiRequest),
+                   $"{nameof(addwalkDifficultiRequest)} cannot be empty.");
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(addwalkDifficultiRequest.Code))
+            {
+                ModelState.AddModelError(nameof(addwalkDifficultiRequest.Code),
+                    $"{nameof(addwalkDifficultiRequest.Code)} is required.");
+            }
+
+            if (ModelState.ErrorCount > 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool ValidateUpdateWalkDifficultyAsyn(Modals.DTO.UpdateWalkDifficultyRequest updateWalkDifficultyRequest)
+        {
+            if (updateWalkDifficultyRequest == null)
+            {
+                ModelState.AddModelError(nameof(updateWalkDifficultyRequest),
+                   $"{nameof(updateWalkDifficultyRequest)} cannot be empty.");
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(updateWalkDifficultyRequest.Code))
+            {
+                ModelState.AddModelError(nameof(updateWalkDifficultyRequest.Code),
+                    $"{nameof(updateWalkDifficultyRequest.Code)} is required.");
+            }
+
+            if (ModelState.ErrorCount > 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        #endregion
     }
-  }
+}
