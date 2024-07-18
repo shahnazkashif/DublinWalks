@@ -1,29 +1,52 @@
 ﻿using AutoMapper;
+using DublinWalks.API.CustomActionFilters;
 using DublinWalks.API.Modals.Domain;
 using DublinWalks.API.Modals.DTO;
 using DublinWalks.API.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace DublinWalks.API.Controllers
 {
     [ApiController]
-    [Route("[Controller]")]
+    [Route("api/[Controller]")]
     public class RegionsController : Controller
     {
         private readonly IRegionRepository regionRepository;
         private readonly IMapper mapper;
+        private readonly ILogger<RegionsController> logger;
 
-        public RegionsController(IRegionRepository regionRepository, IMapper mapper)
+        public RegionsController(IRegionRepository regionRepository, IMapper mapper,
+                                  ILogger<RegionsController> logger)
         {
             this.regionRepository = regionRepository;
             this.mapper = mapper;
-        }
-                
+            this.logger = logger;
+        }                
 
         [HttpGet]
+       // [Authorize(Roles = "Reader")]
         public async Task<IActionResult> GetAllRegionsAsync()
         {
-            var regions = await regionRepository.GetAllAsync();
+            try
+            {
+               // throw new Exception("This is a custome exception");
+
+                var regions = await regionRepository.GetAllAsync();
+
+                var regionsDTO = mapper.Map<List<Modals.DTO.Region>>(regions);
+
+               // logger.LogInformation($"Finished GetAllRegions request with data: {JsonSerializer.Serialize(regionsDTO)}");
+
+                return Ok(regionsDTO);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, ex.Message);
+                throw;
+            }
+            
 
             //return DTO regions
             //var regionsDTO = new List<Modals.DTO.Region>();
@@ -41,9 +64,7 @@ namespace DublinWalks.API.Controllers
             //    };
             //    regionsDTO.Add(regionDTO);
             //});
-
-           var regionsDTO = mapper.Map<List<Modals.DTO.Region>>(regions);
-            return Ok(regionsDTO);
+                       
 
             //var regions = new List<Region>()
             //{
@@ -76,6 +97,7 @@ namespace DublinWalks.API.Controllers
         [HttpGet]
         [Route("{id:guid}")]
         [ActionName("GetRegionAsync")]
+      //  [Authorize(Roles = "Reader")]
         //restricting the route to accept only guid type values not int type or any
         public async Task<IActionResult> GetRegionAsync(Guid id)
         {
@@ -89,22 +111,23 @@ namespace DublinWalks.API.Controllers
         }
 
         [HttpPost]
+       // [ValidateModal]
+       // [Authorize(Roles = "Writer")]
         public async Task<IActionResult> AddRegionAsync(Modals.DTO.AddRegionRequest addRegionRequest)
         {
             //validate the request 
-            if (!ValidateAddRegionAsync(addRegionRequest))
-            {
-                return BadRequest(ModelState);    
-            }
-            //Request(DTO) to Domain modal
+            // if (!ValidateAddRegionAsync(addRegionRequest))
+            // {
+            //   return BadRequest(ModelState);    
+            // }
+            //Request(DTO) to Domain modal           
+
             var region = new Modals.Domain.Region()
             {
                 Code = addRegionRequest.Code,
                 Name = addRegionRequest.Name,
-                Area = addRegionRequest.Area,
-                Lat = addRegionRequest.Lat,
-                Long = addRegionRequest.Long,
-                Population = addRegionRequest.Population
+                RegionImageUrl = addRegionRequest.RegionImageUrl
+
             };
 
             //Pass detail to repository
@@ -116,17 +139,15 @@ namespace DublinWalks.API.Controllers
                 Id = region.Id,
                 Code = region.Code,
                 Name = region.Name,
-                Area = region.Area,
-                Lat = region.Lat,
-                Long = region.Long,
-                Population = region.Population
+                RegionImageUrl = region.RegionImageUrl
             };
 
-            return CreatedAtAction(nameof(GetRegionAsync), new { id = regionDTO.Id }, regionDTO);
+            return CreatedAtAction(nameof(GetRegionAsync), new { id = regionDTO.Id }, regionDTO);            
         }
 
         [HttpDelete]
         [Route("{id:guid}")]
+       // [Authorize(Roles = "Writer, Reader")]
         public async Task<IActionResult> DeleteRegionAsync(Guid id)
         {
             //Get region from Database
@@ -145,10 +166,7 @@ namespace DublinWalks.API.Controllers
                 Id = region.Id,
                 Code = region.Code,
                 Name = region.Name,
-                Area = region.Area,
-                Lat = region.Lat,
-                Long = region.Long,
-                Population = region.Population
+                RegionImageUrl = region.RegionImageUrl
             };
 
             //return OK Response
@@ -158,46 +176,41 @@ namespace DublinWalks.API.Controllers
 
         [HttpPut]
         [Route("{id:guid}")]
+        [ValidateModal]
+      //  [Authorize(Roles = "Writer")]
         public async Task<IActionResult> UpdateRegionAsync([FromRoute] Guid id,
             [FromBody] Modals.DTO.UpdateRegionRequest updateRegionRequest )
         {
+            
+                //Convert DTO to domain modal
+                var region = new Modals.Domain.Region()
+                {
+                    Code = updateRegionRequest.Code,
+                    Name = updateRegionRequest.Name,
+                    RegionImageUrl = updateRegionRequest.RegionImageUrl
+                };
 
-            //Convert DTO to domain modal
-            var region = new Modals.Domain.Region()
-            {
-                Code = updateRegionRequest.Code,
-                Name = updateRegionRequest.Name,
-                Area = updateRegionRequest.Area,
-                Lat = updateRegionRequest.Lat,
-                Long = updateRegionRequest.Long,
-                Population = updateRegionRequest.Population
-            };
-
-            //update region using Repository
-            region = await regionRepository.UpdateAsync(id,region);
+                //update region using Repository
+                region = await regionRepository.UpdateAsync(id, region);
 
 
-            //if null then NotFound
-            if (region == null)
-            {
-                return NotFound(); 
-             }
+                //if null then NotFound
+                if (region == null)
+                {
+                    return NotFound();
+                }
 
 
-            //Convert Domain back to DTO
-            var regionDTO = new Modals.DTO.Region()
-            {
-                Id = region.Id,
-                Code = region.Code,
-                Name = region.Name,
-                Area = region.Area,
-                Lat = region.Lat,
-                Long = region.Long,
-                Population = region.Population
-            };
+                //Convert Domain back to DTO
+                var regionDTO = new Modals.DTO.Region()
+                {
+                    Id = region.Id,
+                    Code = region.Code,
+                    Name = region.Name                    
+                };
 
-            //Return OK Response
-            return Ok(regionDTO);
+                //Return OK Response
+                return Ok(regionDTO);           
         }
 
 
@@ -223,28 +236,28 @@ namespace DublinWalks.API.Controllers
                     $"{nameof(addRegionRequest.Name)} cannot be null or empty or whitespace.");
             }
 
-            if (addRegionRequest.Area <=0 )
-            {
-                ModelState.AddModelError(nameof(addRegionRequest.Area),
-                    $"{nameof(addRegionRequest.Area)} cannot be less than or equal to zero.");
-            }
+            //if (addRegionRequest.Area <=0 )
+            //{
+            //    ModelState.AddModelError(nameof(addRegionRequest.Area),
+            //        $"{nameof(addRegionRequest.Area)} cannot be less than or equal to zero.");
+            //}
 
-            if (addRegionRequest.Lat <= 0)
-            {
-                ModelState.AddModelError(nameof(addRegionRequest.Lat),
-                    $"{nameof(addRegionRequest.Lat)} cannot be less than or equal to zero.");
-            }
+            //if (addRegionRequest.Lat <= 0)
+            //{
+            //    ModelState.AddModelError(nameof(addRegionRequest.Lat),
+            //        $"{nameof(addRegionRequest.Lat)} cannot be less than or equal to zero.");
+            //}
 
-            if (addRegionRequest.Long <= 0)
-            {
-                ModelState.AddModelError(nameof(addRegionRequest.Long),
-                    $"{nameof(addRegionRequest.Long)} cannot be less than or equal to zero.");
-            }
-            if (addRegionRequest.Population < 0)
-            {
-                ModelState.AddModelError(nameof(addRegionRequest.Population),
-                    $"{nameof(addRegionRequest.Population)} cannot be less than zero.");
-            }
+            //if (addRegionRequest.Long <= 0)
+            //{
+            //    ModelState.AddModelError(nameof(addRegionRequest.Long),
+            //        $"{nameof(addRegionRequest.Long)} cannot be less than or equal to zero.");
+            //}
+            //if (addRegionRequest.Population < 0)
+            //{
+            //    ModelState.AddModelError(nameof(addRegionRequest.Population),
+            //        $"{nameof(addRegionRequest.Population)} cannot be less than zero.");
+            //}
 
             if (ModelState.ErrorCount > 0)
             {

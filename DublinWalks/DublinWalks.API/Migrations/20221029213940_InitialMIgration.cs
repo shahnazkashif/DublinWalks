@@ -46,7 +46,7 @@ namespace DublinWalks.API.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Length = table.Column<double>(type: "float", nullable: false),
                     RegionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    WalkDifficultyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    DifficultyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -58,8 +58,8 @@ namespace DublinWalks.API.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Walks_WalkDifficulty_WalkDifficultyId",
-                        column: x => x.WalkDifficultyId,
+                        name: "FK_Walks_WalkDifficulty_DifficultyId",
+                        column: x => x.DifficultyId,
                         principalTable: "WalkDifficulty",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -71,9 +71,9 @@ namespace DublinWalks.API.Migrations
                 column: "RegionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Walks_WalkDifficultyId",
+                name: "IX_Walks_DifficultyId",
                 table: "Walks",
-                column: "WalkDifficultyId");
+                column: "DifficultyId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

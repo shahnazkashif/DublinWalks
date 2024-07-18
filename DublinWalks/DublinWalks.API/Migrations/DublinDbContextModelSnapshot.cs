@@ -17,10 +17,39 @@ namespace DublinWalks.API.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.10")
+                .HasAnnotation("ProductVersion", "7.0.15")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("DublinWalks.API.Modals.Domain.Image", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FileDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileExtension")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("FileSizeInBytes")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Images");
+                });
 
             modelBuilder.Entity("DublinWalks.API.Modals.Domain.Region", b =>
                 {
@@ -28,25 +57,17 @@ namespace DublinWalks.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("Area")
-                        .HasColumnType("float");
-
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("Lat")
-                        .HasColumnType("float");
-
-                    b.Property<double>("Long")
-                        .HasColumnType("float");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("Population")
-                        .HasColumnType("bigint");
+                    b.Property<string>("RegionImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -59,7 +80,14 @@ namespace DublinWalks.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("Length")
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("DifficultyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("LengthInKm")
                         .HasColumnType("float");
 
                     b.Property<string>("Name")
@@ -69,14 +97,15 @@ namespace DublinWalks.API.Migrations
                     b.Property<Guid>("RegionId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("WalkDifficultyId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("WalkImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RegionId");
+                    b.HasIndex("DifficultyId");
 
-                    b.HasIndex("WalkDifficultyId");
+                    b.HasIndex("RegionId");
 
                     b.ToTable("Walks");
                 });
@@ -98,26 +127,21 @@ namespace DublinWalks.API.Migrations
 
             modelBuilder.Entity("DublinWalks.API.Modals.Domain.Walk", b =>
                 {
+                    b.HasOne("DublinWalks.API.Modals.Domain.WalkDifficulty", "Difficulty")
+                        .WithMany()
+                        .HasForeignKey("DifficultyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("DublinWalks.API.Modals.Domain.Region", "Region")
-                        .WithMany("Walks")
+                        .WithMany()
                         .HasForeignKey("RegionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DublinWalks.API.Modals.Domain.WalkDifficulty", "WalkDifficulty")
-                        .WithMany()
-                        .HasForeignKey("WalkDifficultyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Difficulty");
 
                     b.Navigation("Region");
-
-                    b.Navigation("WalkDifficulty");
-                });
-
-            modelBuilder.Entity("DublinWalks.API.Modals.Domain.Region", b =>
-                {
-                    b.Navigation("Walks");
                 });
 #pragma warning restore 612, 618
         }

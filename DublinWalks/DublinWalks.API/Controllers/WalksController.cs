@@ -3,6 +3,7 @@ using DublinWalks.API.Modals.Domain;
 using DublinWalks.API.Modals.DTO;
 using DublinWalks.API.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace DublinWalks.API.Controllers
 {
@@ -23,17 +24,23 @@ namespace DublinWalks.API.Controllers
             this.walkDifficultyRepository = walkDifficultyRepository;
         }
 
+        // Get: /api/walks?filterOn=Name&filterQuery=Track&sortBy=Name&isAscending=true&pageNumber=1&pageSize=10
         [HttpGet]
-        public async Task<IActionResult> GetAllWalksAsync()
+        public async Task<IActionResult> GetAllWalksAsync([FromQuery] string? filterOn, [FromQuery] string? filterQuery,
+                [FromQuery] string? sortBy, [FromQuery] bool? isAscending, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 1000) 
         {
-            //Fetch data from database - domain walks
-            var walksDomain = await walkRepository.GetAllAsync();
+                //Fetch data from database - domain walks
+                var walksDomain = await walkRepository.GetAllAsync(filterOn, filterQuery, sortBy, isAscending ?? true,
+                    pageNumber, pageSize);
 
-            //convert domain walk to DTO walks
-            var walksDTO = mapper.Map<List<Modals.DTO.Walk>>(walksDomain);
+                //convert domain walk to DTO walks
+                var walksDTO = mapper.Map<List<Modals.DTO.Walk>>(walksDomain);
+
+            //create an exception 
+            throw new Exception("This is a new exception");
 
             //return reponse
-            return Ok(walksDTO);
+            return Ok(walksDTO);            
         }
 
         [HttpGet]
@@ -66,9 +73,9 @@ namespace DublinWalks.API.Controllers
             var walkDomain = new Modals.Domain.Walk
             {
                 Name = addwalkrequest.Name,
-                Length = addwalkrequest.Length,
+                LengthInKm = addwalkrequest.LengthInKm,
                 RegionId = addwalkrequest.RegionId,
-                WalkDifficultyId = addwalkrequest.WalkDifficultyId
+                DifficultyId = addwalkrequest.DifficultyId
             };
 
             //pass domain object to repository to persist this
@@ -79,9 +86,9 @@ namespace DublinWalks.API.Controllers
             {
                 Id = walkDomain.Id,
                 Name = walkDomain.Name,
-                Length = walkDomain.Length,
+                LengthInKm = walkDomain.LengthInKm,
                 RegionId = walkDomain.RegionId,
-                WalkDifficultyId = walkDomain.WalkDifficultyId
+                DifficultyId = walkDomain.DifficultyId
             };
 
             //send DTO response back to client
@@ -103,9 +110,9 @@ namespace DublinWalks.API.Controllers
             var walkDomain = new Modals.Domain.Walk
             {
                 Name = updateWalkRequest.Name,
-                Length = updateWalkRequest.Length,
+                LengthInKm = updateWalkRequest.LengthInKm,
                 RegionId = updateWalkRequest.RegionId,
-                WalkDifficultyId = updateWalkRequest.WalkDifficultyId
+                DifficultyId = updateWalkRequest.DifficultyId
             };
 
             //pass details to repository - Get Domain object in response (or null)
@@ -122,9 +129,9 @@ namespace DublinWalks.API.Controllers
             {
                 Id = walkDomain.Id,
                 Name = walkDomain.Name,
-                Length = walkDomain.Length,
+                LengthInKm = walkDomain.LengthInKm,
                 RegionId = walkDomain.RegionId,
-                WalkDifficultyId = walkDomain.WalkDifficultyId
+                DifficultyId = walkDomain.DifficultyId
             };
 
 
@@ -163,10 +170,10 @@ namespace DublinWalks.API.Controllers
                     $"{nameof(addwalkrequest.Name)} cannot be null or empty or whitespace.");
             }
 
-            if (addwalkrequest.Length <= 0)
+            if (addwalkrequest.LengthInKm <= 0)
             {
-                ModelState.AddModelError(nameof(addwalkrequest.Length),
-                    $"{nameof(addwalkrequest.Length)} should be greater than zero.");
+                ModelState.AddModelError(nameof(addwalkrequest.LengthInKm),
+                    $"{nameof(addwalkrequest.LengthInKm)} should be greater than zero.");
             }
 
             var region = await regionRepository.GetAsync(addwalkrequest.RegionId);
@@ -176,11 +183,11 @@ namespace DublinWalks.API.Controllers
                    $"{nameof(addwalkrequest.RegionId)} is invalid.");
             }
 
-            var walkDifficulty = await walkDifficultyRepository.GetAsync(addwalkrequest.WalkDifficultyId);
+            var walkDifficulty = await walkDifficultyRepository.GetAsync(addwalkrequest.DifficultyId);
             if (walkDifficulty == null)
             {
-                ModelState.AddModelError(nameof(addwalkrequest.WalkDifficultyId),
-                  $"{nameof(addwalkrequest.WalkDifficultyId)} is invalid.");
+                ModelState.AddModelError(nameof(addwalkrequest.DifficultyId),
+                  $"{nameof(addwalkrequest.DifficultyId)} is invalid.");
             }
 
             if (ModelState.ErrorCount > 0)
@@ -206,10 +213,10 @@ namespace DublinWalks.API.Controllers
                     $"{nameof(updatewalkrequest.Name)} cannot be null or empty or whitespace.");
             }
 
-            if (updatewalkrequest.Length <= 0)
+            if (updatewalkrequest.LengthInKm <= 0)
             {
-                ModelState.AddModelError(nameof(updatewalkrequest.Length),
-                    $"{nameof(updatewalkrequest.Length)} should be greater than zero.");
+                ModelState.AddModelError(nameof(updatewalkrequest.LengthInKm),
+                    $"{nameof(updatewalkrequest.LengthInKm)} should be greater than zero.");
             }
 
             var region = await regionRepository.GetAsync(updatewalkrequest.RegionId);
@@ -219,11 +226,11 @@ namespace DublinWalks.API.Controllers
                    $"{nameof(updatewalkrequest.RegionId)} is invalid.");
             }
 
-            var walkDifficulty = await walkDifficultyRepository.GetAsync(updatewalkrequest.WalkDifficultyId);
+            var walkDifficulty = await walkDifficultyRepository.GetAsync(updatewalkrequest.DifficultyId);
             if (walkDifficulty == null)
             {
-                ModelState.AddModelError(nameof(updatewalkrequest.WalkDifficultyId),
-                  $"{nameof(updatewalkrequest.WalkDifficultyId)} is invalid.");
+                ModelState.AddModelError(nameof(updatewalkrequest.DifficultyId),
+                  $"{nameof(updatewalkrequest.DifficultyId)} is invalid.");
             }
 
             if (ModelState.ErrorCount > 0)

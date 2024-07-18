@@ -6,13 +6,15 @@ namespace DublinWalks.API.Modals.DTO
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public double Length { get; set; }
+        public string Description { get; set; }
+        public double LengthInKm { get; set; }
+        public string WalkImageUrl { get; set; }
         public Guid RegionId { get; set; }
-        public Guid WalkDifficultyId { get; set; }
+        public Guid DifficultyId { get; set; }
 
         //Navigation properties
         public Region Region { get; set; }
-        public WalkDifficulty WalkDifficulty { get; set; }
+        public WalkDifficulty Difficulty { get; set; }
     }
 
 }

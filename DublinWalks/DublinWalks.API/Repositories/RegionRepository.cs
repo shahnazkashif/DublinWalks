@@ -57,11 +57,7 @@ namespace DublinWalks.API.Repositories
 
             existingRegion.Code = region.Code;
             existingRegion.Name = region.Name;
-            existingRegion.Area = region.Area;
-            existingRegion.Lat = region.Lat;
-            existingRegion.Long = region.Long;
-            existingRegion.Population = region.Population;
-
+            
            await  ndublinwalkdb.SaveChangesAsync();
             return existingRegion;  
 

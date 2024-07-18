@@ -71,14 +71,14 @@ namespace DublinWalks.API.Migrations
                     b.Property<Guid>("RegionId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("WalkDifficultyId")
+                    b.Property<Guid>("DifficultyId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("RegionId");
 
-                    b.HasIndex("WalkDifficultyId");
+                    b.HasIndex("DifficultyId");
 
                     b.ToTable("Walks");
                 });
@@ -108,7 +108,7 @@ namespace DublinWalks.API.Migrations
 
                     b.HasOne("DublinWalks.API.Modals.Domain.WalkDifficulty", "WalkDifficulty")
                         .WithMany()
-                        .HasForeignKey("WalkDifficultyId")
+                        .HasForeignKey("DifficultyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
