@@ -57,6 +57,7 @@ namespace DublinWalks.API.Repositories
 
             existingRegion.Code = region.Code;
             existingRegion.Name = region.Name;
+            existingRegion.RegionImageUrl = region.RegionImageUrl; 
             
            await  ndublinwalkdb.SaveChangesAsync();
             return existingRegion;  

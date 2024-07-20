@@ -206,7 +206,8 @@ namespace DublinWalks.API.Controllers
                 {
                     Id = region.Id,
                     Code = region.Code,
-                    Name = region.Name                    
+                    Name = region.Name,
+                    RegionImageUrl = region.RegionImageUrl
                 };
 
                 //Return OK Response
